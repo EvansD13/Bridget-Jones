@@ -43,9 +43,20 @@ async function update(req, res){
     }
 }
 
+async function destroy(req, res){
+    try{
+        const idx = parseInt(req.params.id)
+        const entry = await Entry.getOneById(idx)
+        const result = await entry.deleteEntry()
+    }catch(err){
+        res.status(400).send({error: err.message})
+    }
+}
+
 module.exports = {
     index,
     show,
     create,
-    update
+    update,
+    destroy
 }

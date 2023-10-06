@@ -38,7 +38,7 @@ class Entry {
     }
 
     static async getAll(){
-        const response = await db.query("SELECT * FROM diary ORDER BY entry_date")
+        const response = await db.query("SELECT * FROM diary ORDER BY entry_date DESC;")
         if (response.rows.length === 0){
             throw new Error("Can't find your diary!")
         }
@@ -78,6 +78,15 @@ class Entry {
             throw new Error("Unable to update diary entry!")
         }
         return new Entry(response.rows[0]);
+    }
+    async deleteEntry(){
+        const query = 'DELETE FROM diary WHERE entry_id = $1 RETURNING *'
+        const response = await db.query(query, [this.id])
+        if (response.rows.length != 1){
+            throw new Error("Unable to delete entry!")
+        }
+        return new Entry(response.rows[0])
+
     }
 }
 
