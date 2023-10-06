@@ -1,4 +1,25 @@
 const db = require("../database/connect")
+
+function getDateTime(){
+    const y = new Date().getFullYear()
+    const m = new Date().getMonth()
+    const d = new Date().getDate()
+
+    const today = `${d}-${m + 1}-${y}`
+    let hour = new Date().getHours()
+    if (hour < 10){
+        time = `0${hour}`
+    }
+    let mins = new Date().getMinutes()
+    if (hour < 10){
+        time = `0${hour}`
+    }
+
+    const time = `${hour}:${mins}`
+    console.log(today)
+    return [today, time]
+}
+
 function timeCorrect(time){
     if (time < 10){
         console.log(time)
@@ -33,21 +54,9 @@ class Entry {
     }
 
     static async createEntry(data){
-        const y = new Date().getFullYear()
-        const m = new Date().getMonth()
-        const d = new Date().getDate()
-
-        const today = `${d}-${m + 1}-${y}`
-        let hour = new Date().getHours()
-        if (hour < 10){
-            time = `0${hour}`
-        }
-        let mins = new Date().getMinutes()
-        if (hour < 10){
-            time = `0${hour}`
-        }
-
-        const time = `${hour}:${mins}`
+       const temporal  = getDateTime()
+       const today = temporal[0]
+       const time = temporal[1]
 
         const { entry_text, category } = data
         const query = "INSERT INTO diary (entry_date, entry_time, entry_text, category) VALUES ($1, $2, $3, $4) RETURNING *;"
@@ -56,12 +65,19 @@ class Entry {
         const response = await db.query(query, values)
         const entryID = response.rows[0].entry_id
         const newEntry = await Entry.getOneById(entryID)
+
         return newEntry
+    }
 
-
-
-
-
+    async updateEntry(data){
+        console.log([data, this.id])
+        const query = 'UPDATE diary SET entry_text = $1 WHERE entry_id = $2 RETURNING *'
+        const values = [data, this.id]
+        const response = await db.query(query, values)
+        if (response.rows.length != 1){
+            throw new Error("Unable to update diary entry!")
+        }
+        return new Entry(response.rows[0]);
     }
 }
 
